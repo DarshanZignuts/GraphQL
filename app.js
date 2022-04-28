@@ -41,58 +41,126 @@ try {
   sails = require("sails");
   rc = require("sails/accessible/rc");
 
-  // const typeDefs = buildSchema(`
-  // type Other {
-  //   Message: String
-  // }
-
-  // type Query {
-  //   greeting: Other
-  //   message: String
-  // }
-  // `);
-
-  const typeDefs = gql`
-    type Book {
-      title: String
-      yearPublished: Int
-      genre: String
+  const typeDefs = `
+  type Query {
+    author(id: String, populate: CustomJson): author
+    authors(where: CustomJson, sort: String, skip: Int, limit: Int, populate: CustomJson, aggregate: CustomJson): [author]
+    book(id: String!, populate: CustomJson): book
+    books(where: CustomJson, sort: String, skip: Int, limit: Int, populate: CustomJson, aggregate: CustomJson): [book]
+    count(modelName: String!, where: CustomJson): count
+    sum(modelName: String!, where: CustomJson, field: String!): sum
+    avg(modelName: String!, where: CustomJson, field: String!): avg
+  }
+  
+  type author {
+    createdAt: Float
+    updatedAt: Float
+    id: String
+    name: String!
+    country: String
+  }
+  
+  """CustomJson scalar type"""
+  scalar CustomJson
+  
+  type book {
+    createdAt: Float
+    updatedAt: Float
+    id: String
+    title: String!
+    yearPublished: String!
+    genre: String
+    author: author
     }
 
-    type Author {
-      name: String
-      country: String
-      books: [Book]
-    }
+  type count {
+    """return count of specific fields"""
+    count: Int
+  }
 
-    type Query {
-      message: String
-      Author: [Author]
-    }
-  `;
+  type sum {
+    """return sum of specific fields"""
+    sum: Int
+  }
 
-  const data = async function (req, res) {
-    const data = await Author.find().populate("books");
-    return data;
-  };
+  type avg {
+    """return avg of specific fields"""
+    avg: Int
+  }
+  
+  type Mutation {
+    createAuthor(createdAt: Float, updatedAt: Float, name: String!, country: String): author
+    updateAuthor(createdAt: Float, updatedAt: Float, id: String!, name: String, country: String): author
+    deleteAuthor(id: String!): author
+    createBook(createdAt: Float, updatedAt: Float, title: String!, yearPublished: String!, genre: String!, author: String!): book
+    updateBook(createdAt: Float, updatedAt: Float, id: String!, title: String, yearPublished: String, genre: String): book
+    deleteBook(id: String!): book
+  }`;
 
   const resolvers = {
     Query: {
-      message: () => "hey found it",
-      Author: () => {
-        return data();
+      async author(parent, args, context, info) {
+        const data = await Author.findOne({ id: args.id }).populate("books");
+        return data;
       },
+      async authors(parent, args, context, info) {
+        const data = await Author.find().populate("books");
+        return data;
+      },
+      async book(parent, args, context, info) {
+        const data = await Book.findOne({ id: args.id }).populate("author");
+        return data;
+      },
+      async books(parent, args, context, info) {
+        const data = await Book.find().populate("author");
+        return data;
+      }
     },
-    // checkDirect: () => "hey found done",
+    Mutation: {
+
+      async createAuthor(parent, args, context, info) {
+        const createNew = await Author.create({
+          name : args.name,
+          country: args.country,
+        }).fetch();
+        return createNew;
+      },
+
+      async updateAuthor(parent, args, context, info) {
+        console.log('UPATE::: ', args.id);
+        const update = await Author.updateOne({id: args.id},{
+          name : args.name,
+          country: args.country,
+        });
+
+        return update;
+      },
+      
+      async deleteAuthor(parent, args, context, info) {
+        console.log('delete::: ', args.id);
+        const deleteData = await Author.destroy({id: args.id});
+
+        return deleteData;
+      },
+      async createBook(parent, args, context, info) {
+        const createNew = await Book.create({
+          title : args.title,
+          yearPublished : args.yearPublished,
+          genre : args.genre,
+          author: args.author,
+        }).fetch();
+        return createNew;
+      },
+    }
   };
 
-  // console.log("resolverr%^^%^%^^%^^%^%^%^^%^%^%^^%^%^% ", resolvers);
-  // console.log("TypeDefs%^^%^%^^%^^%^%^%^^%^%^%^^%^%^% ", typeDefs);
-
   const server = new ApolloServer({ typeDefs, resolvers });
-  server
-    .listen({ port: 9000 })
-    .then(({ url }) => console.log(`Server Running on ${url}`));
+  server.listen({ port: 9000 }).then(({ url }) =>
+    console.log(`
+    Server Running on ${url}
+    █ █ █ █ █ █ █ █ █ █ █ █ █ █ █ █ █ █ █ █ █ 
+    `)
+  );
 } catch (err) {
   // console.error("Encountered an error when attempting to require('sails'):");
   // console.error(err.stack);

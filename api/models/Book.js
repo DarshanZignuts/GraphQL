@@ -6,13 +6,17 @@
  */
 
 module.exports = {
+  graphql: {
+    query: true,
+    mutation: true,
+  },
   attributes: {
     //  ╔═╗╦═╗╦╔╦╗╦╔╦╗╦╦  ╦╔═╗╔═╗
     //  ╠═╝╠╦╝║║║║║ ║ ║╚╗╔╝║╣ ╚═╗
     //  ╩  ╩╚═╩╩ ╩╩ ╩ ╩ ╚╝ ╚═╝╚═╝
-    id:{
-      type: 'string',
-      columnName: "_id"
+    id: {
+      type: "string",
+      columnName: "_id",
     },
 
     title: {

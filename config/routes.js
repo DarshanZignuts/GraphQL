@@ -19,6 +19,7 @@ module.exports.routes = {
    ***************************************************************************/
 
   "/": { view: "pages/homepage" },
+  'POST /graphql': { action: 'graphql/gql' },
 
   "get /check/": "BookController.check",
   "post /createbook/": "BookController.createbook",

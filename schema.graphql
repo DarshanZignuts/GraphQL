@@ -1,0 +1,54 @@
+type Query {
+  author(id: Int!, populate: CustomJson): author
+  authors(where: CustomJson, sort: String, skip: Int, limit: Int, populate: CustomJson, aggregate: CustomJson): [author]
+  book(id: Int!, populate: CustomJson): book
+  books(where: CustomJson, sort: String, skip: Int, limit: Int, populate: CustomJson, aggregate: CustomJson): [book]
+  count(modelName: String!, where: CustomJson): count
+  sum(modelName: String!, where: CustomJson, field: String!): sum
+  avg(modelName: String!, where: CustomJson, field: String!): avg
+}
+
+type author {
+  createdAt: Float
+  updatedAt: Float
+  id: String
+  name: String!
+  country: String
+}
+
+"""CustomJson scalar type"""
+scalar CustomJson
+
+type book {
+  createdAt: Float
+  updatedAt: Float
+  id: String
+  title: String!
+  yearPublished: String!
+  genre: String
+  author: author
+}
+
+type count {
+  """return count of specific fields"""
+  count: Int
+}
+
+type sum {
+  """return sum of specific fields"""
+  sum: Int
+}
+
+type avg {
+  """return avg of specific fields"""
+  avg: Int
+}
+
+type Mutation {
+  createAuthor(createdAt: Float, updatedAt: Float, name: String!, country: String): author
+  updateAuthor(createdAt: Float, updatedAt: Float, id: String!, name: String, country: String): author
+  deleteAuthor(id: String!): author
+  createBook(createdAt: Float, updatedAt: Float, title: String!, yearPublished: String!, genre: String): book
+  updateBook(createdAt: Float, updatedAt: Float, id: String!, title: String, yearPublished: String, genre: String): book
+  deleteBook(id: String!): book
+}
